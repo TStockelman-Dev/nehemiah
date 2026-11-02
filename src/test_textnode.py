@@ -1,16 +1,16 @@
 import unittest
 from src.htmlnode import LeafNode, ParentNode
-from textnode import TextNode, TextType
+from textnode import TextNode, TextType, text_node_to_html_node
 
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
-        node = TextNode("This is a text node", TextType.Bold)
-        node2 = TextNode("This is a text node", TextType.Bold)
+        node = TextNode("This is a text node", TextType.BOLD)
+        node2 = TextNode("This is a text node", TextType.BOLD)
         self.assertEqual(node, node2)
     def test_not_eq(self):
-        node = TextNode("This is a text node", TextType.Italic)
-        node2 = TextNode("This is not the same Text Node", TextType.Bold)
+        node = TextNode("This is a text node", TextType.ITALIC)
+        node2 = TextNode("This is not the same Text Node", TextType.BOLD)
         self.assertNotEqual(node, node2)
     def test_leaf_to_html_p(self):
         node = LeafNode("p", "Hello, world!")
@@ -29,6 +29,12 @@ class TestTextNode(unittest.TestCase):
             parent_node.to_html(),
             "<div><span><b>grandchild</b></span></div>",
         )
+
+    def test_text(self):
+        node = TextNode("This is a text node", TextType.TEXT)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, None)
+        self.assertEqual(html_node.value, "This is a text node")
 
 
 if __name__ == "__main__":

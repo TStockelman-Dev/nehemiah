@@ -1,8 +1,9 @@
 from textnode import TextNode, TextType
+from content_copy import content_copy
+
 
 def main():
-    node = TextNode("Hello, World!", TextType.Plain)
-    print(node)
+    content_copy("./static", "./public")
 
 
 if __name__ == "__main__":
