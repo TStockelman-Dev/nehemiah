@@ -175,6 +175,38 @@ the **same** even with inline stuff
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
 
+    def test_markdown_image_renders(self):
+        md = "![JRR Tolkien sitting](/images/tolkien.png)"
+        node = markdown_to_html_node(md)
+        self.assertEqual(
+            node.to_html(),
+            '<div><p><img src="/images/tolkien.png" alt="JRR Tolkien sitting"></p></div>',
+        )
+
+    def test_italic_in_list_item(self):
+        md = "- Disney _didn't ruin it_ (okay, but Amazon might have)"
+        node = markdown_to_html_node(md)
+        self.assertEqual(
+            node.to_html(),
+            "<div><ul><li>Disney <i>didn't ruin it</i> (okay, but Amazon might have)</li></ul></div>",
+        )
+
+    def test_bold_in_unordered_list_item(self):
+        md = "- **The Gift of Rebirth**: Glorfindel returned"
+        node = markdown_to_html_node(md)
+        self.assertEqual(
+            node.to_html(),
+            "<div><ul><li><b>The Gift of Rebirth</b>: Glorfindel returned</li></ul></div>",
+        )
+
+    def test_bold_paragraph_is_not_unordered_list(self):
+        md = '**"Váya márië."**'
+        node = markdown_to_html_node(md)
+        self.assertEqual(
+            node.to_html(),
+            '<div><p><b>"Váya márië."</b></p></div>',
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

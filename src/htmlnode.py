@@ -18,10 +18,19 @@ class HTMLNODE:
         return f" {props_str}"
 
 class LeafNode(HTMLNODE):
+    VOID_ELEMENTS = {
+        "area", "base", "br", "col", "embed", "hr", "img", "input",
+        "link", "meta", "param", "source", "track", "wbr",
+    }
+
     def __init__(self, tag, value, props=None):
         super().__init__(tag=tag, value=value, props=props)
 
     def to_html(self):
+        if self.tag in self.VOID_ELEMENTS:
+            if self.value is not None:
+                raise ValueError(f"{self.tag} elements cannot have a value")
+            return f"<{self.tag}{self.props_to_html()}>"
         if self.value is None:
             raise ValueError("LeafNode value cannot be None")
         if self.tag is None:

@@ -86,3 +86,10 @@ def text_to_textnodes(text):
     node_list = split_nodes_image(node_list)
     node_list = split_nodes_link(node_list)
     return node_list
+
+def extract_title(markdown):
+    lines = markdown.splitlines()
+    for line in lines:
+        if line.startswith("# "):
+            return line[2:]
+    raise ValueError("No title found in the markdown content.")

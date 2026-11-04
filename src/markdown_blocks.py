@@ -20,12 +20,18 @@ def block_to_block_type(block):
         return BlockType.CODE
     elif stripped_block.startswith(">"):
         return BlockType.QUOTE
-    elif stripped_block.startswith("- ") or stripped_block.startswith("*"):
+    elif stripped_block.startswith("- ") or stripped_block.startswith("* "):
         return BlockType.UNORDERED_LIST
     elif stripped_block[0].isdigit() and stripped_block[1:3] == ". ":
         return BlockType.ORDERED_LIST
     else:
         return BlockType.PARAGRAPH
+
+def inline_nodes(text):
+    return [
+        text_node_to_html_node(node)
+        for node in text_to_textnodes(text)
+    ]
 
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
@@ -37,11 +43,7 @@ def markdown_to_html_node(markdown):
             html_nodes.append(LeafNode(tag=f"h{level}", value=block.strip("# ").strip()))
         elif block_type == BlockType.PARAGRAPH:
             paragraph_text = " ".join(block.splitlines())
-            paragraph_nodes = [
-                text_node_to_html_node(node)
-                for node in text_to_textnodes(paragraph_text)
-            ]
-            html_nodes.append(ParentNode(tag="p", children=paragraph_nodes))
+            html_nodes.append(ParentNode(tag="p", children=inline_nodes(paragraph_text)))
         elif block_type == BlockType.CODE:
             code_content = block[3:-3]
             if code_content.startswith("\n"):
@@ -51,9 +53,30 @@ def markdown_to_html_node(markdown):
             quote_content = block.strip("> ").strip()
             html_nodes.append(LeafNode(tag="blockquote", value=quote_content))
         elif block_type == BlockType.UNORDERED_LIST:
-            list_items = [item.strip("-* ").strip() for item in block.split("\n") if item.strip()]
-            html_nodes.append(ParentNode(tag="ul", children=[LeafNode(tag="li", value=item) for item in list_items]))
+            list_items = []
+            for item in block.split("\n"):
+                item = item.strip()
+                if not item:
+                    continue
+                list_items.append(item[2:].strip())
+            html_nodes.append(ParentNode(
+                tag="ul",
+                children=[
+                    ParentNode(tag="li", children=inline_nodes(item))
+                    for item in list_items
+                ],
+            ))
         elif block_type == BlockType.ORDERED_LIST:
-            list_items = [item.strip().split(". ", 1)[1] for item in block.split("\n") if item.strip()]
-            html_nodes.append(ParentNode(tag="ol", children=[LeafNode(tag="li", value=item) for item in list_items]))
+            list_items = [
+                item.strip().split(". ", 1)[1]
+                for item in block.split("\n")
+                if item.strip()
+            ]
+            html_nodes.append(ParentNode(
+                tag="ol",
+                children=[
+                    ParentNode(tag="li", children=inline_nodes(item))
+                    for item in list_items
+                ],
+            ))
     return ParentNode(tag="div", children=html_nodes)
